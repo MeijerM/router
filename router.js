@@ -13,6 +13,8 @@
 window.router = {
 	routes: {},
 	defaultTargetId: "page",
+	startRoute: null,
+	notFoundRoute: null,
 	_hashchange: function(){
 		var parts = window.location.hash.substring(1).split("/");
 		var route = null;
@@ -32,6 +34,7 @@ window.router = {
 		}
 	},
 	_changeRoute: function (route) {
+
 		//getting the viewElement
 		if (!route.viewElement) {
 			//get the view from a remote source
@@ -62,7 +65,7 @@ window.router = {
 		if (route.viewModelType && !route.viewModel) {
 			var fn = new Function("return new " + route.viewModelType + "();");
 			route.viewModel = fn();
-			if(route.viewModel.init){
+			if (route.viewModel.init) {
 				route.viewModel.init(route.params);
 			}
 			ko.applyBindings(route.viewModel, route.viewElement);
@@ -83,6 +86,15 @@ window.router = {
 	},
 	init:function(){
 		window.addEventListener("hashchange", window.router._hashchange, false);
+		window.addEventListener("load", function () {
+			if (location.hash.length == 0) {
+				if (window.router.startRoute && window.router.routes[window.router.startRoute])
+					location.href = "#" + window.router.startRoute;
+			}
+			else {
+				window.router._hashchange();
+			}
+		}, false);
 	}
 };
 window.router.init();
